@@ -1,0 +1,21 @@
+{
+  "name": "avatar-studio",
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "scripts": {
+    "dev": "node server.js",
+    "build:index": "node scripts/build-index.js",
+    "check": "node --check server.js && node --check app.js && node --check admin.js && node --check scripts/build-index.js && node --check lib/rag-store.js",
+    "test": "node --test test/*.test.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "openai": "^6.10.0"
+  },
+  "license": "MIT"
+}

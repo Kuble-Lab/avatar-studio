@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="de">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Avatar Studio</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+<header class="topbar"><a class="brand" href="/">◈ <span>Avatar Studio</span></a><a class="settings-link" href="/admin">Konfigurieren</a></header>
+<main class="workspace">
+<section class="avatar-panel" aria-labelledby="avatar-name">
+ <div class="eyebrow">DEIN DIGITALER GESPRÄCHSPARTNER</div>
+ <div class="avatar-stage" id="avatar-stage" data-state="ready"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="avatar-core" id="avatar-initial" aria-hidden="true">A</div><img id="avatar-image" alt="" hidden></div>
+ <div class="identity"><h1 id="avatar-name">Alex</h1><p id="avatar-description">Dein persönlicher KI-Avatar</p></div>
+ <p class="status" id="status" role="status">Wird geladen …</p>
+ <button class="voice-button" id="voice-button" disabled>Gespräch starten</button>
+ <p class="voice-hint">Sprich mit deinem Avatar oder schreib eine Nachricht.</p>
+ <p class="disclosure">KI-generierte Antworten und Stimme</p>
+</section>
+<section class="conversation" aria-labelledby="conversation-heading">
+ <div class="conversation-header"><div><span class="eyebrow">IM DIALOG</span><h2 id="conversation-heading">Dein Gespräch</h2></div><button class="subtle" id="clear-button" title="Gesprächsverlauf löschen">Neu beginnen</button></div>
+ <div class="messages" id="messages" role="log" aria-live="polite" aria-label="Gesprächsverlauf"></div>
+ <form id="chat-form"><label class="sr-only" for="question">Deine Nachricht</label><textarea id="question" rows="2" maxlength="8000" placeholder="Was möchtest du besprechen?"></textarea><div class="composer-footer"><span>Enter zum Senden · Shift + Enter für neue Zeile</span><button id="send-button" type="submit" disabled>Senden</button></div></form>
+ <p class="privacy-note">Der Verlauf bleibt in diesem Tab. Nachrichten und Audio werden zur Verarbeitung an OpenAI übertragen.</p>
+</section>
+</main><script src="app.js" defer></script>
+</body></html>

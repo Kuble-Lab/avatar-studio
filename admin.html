@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Avatar Admin</title>
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <main class="admin-shell">
+      <section class="admin-header" aria-labelledby="admin-title">
+        <a href="/">← Zurück zum Avatar</a>
+        <h1 id="admin-title">Avatar Admin</h1>
+      </section>
+
+      <section class="admin-panel" id="login-panel" hidden>
+        <form id="login-form" class="admin-form">
+          <label for="admin-password">Passwort</label>
+          <input id="admin-password" name="password" type="password" autocomplete="current-password" autofocus />
+          <button type="submit">Einloggen</button>
+        </form>
+      </section>
+
+      <section class="admin-panel" id="settings-panel" hidden>
+        <div class="admin-toolbar">
+          <div>
+            <p class="eyebrow">Zentrale Verwaltung</p>
+            <h2>Avatar-Konfiguration</h2>
+          </div>
+          <button class="ghost-button" type="button" id="logout-button">Logout</button>
+        </div>
+
+        <section class="admin-section" aria-labelledby="prompt-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Verhalten</p>
+              <h3 id="prompt-heading">Avatar & Persönlichkeit</h3>
+            </div>
+          </div>
+          <form id="settings-form" class="settings-form">
+            <div class="profile-grid">
+ <label>Name<input id="profile-name" maxlength="80" required></label>
+ <label>Kurzbeschreibung<input id="profile-description" maxlength="240"></label>
+ <label>Akzentfarbe<input id="profile-accent" type="color" value="#5369e8"></label>
+ <label>Stimme<select id="profile-voice"><option value="marin">marin</option><option value="cedar">cedar</option><option value="alloy">alloy</option><option value="ash">ash</option><option value="ballad">ballad</option><option value="coral">coral</option><option value="echo">echo</option><option value="sage">sage</option><option value="shimmer">shimmer</option><option value="verse">verse</option></select></label>
+ <label>Wissensmodus<select id="profile-mode"><option value="avatar">Wissen und allgemeine Antworten</option><option value="rag_only">Nur eigene Wissensquellen</option></select></label>
+ <label>Avatar-Bild<input id="profile-image-file" type="file" accept="image/png,image/jpeg,image/webp"><span class="field-help">PNG, JPEG oder WebP, maximal 1 MB. Ohne Bild erscheint ein neutraler Avatar.</span></label>
+ </div>
+ <div class="image-preview"><img id="profile-image-preview" alt="Avatar-Vorschau" hidden width="80" height="80"><button type="button" class="ghost-button" id="remove-avatar-image">Bild entfernen</button></div>
+ <label for="profile-greeting">Begrüssung</label><input id="profile-greeting" maxlength="500">
+ <label for="profile-style">Sprechweise</label><textarea id="profile-style" rows="2" maxlength="900"></textarea>
+ <label for="system-prompt-editor">Persönlichkeit und Anweisungen</label>
+            <textarea id="system-prompt-editor" spellcheck="false"></textarea>
+            <div class="settings-actions">
+              <button class="ghost-button" type="button" id="reset-button">Standard-Persönlichkeit laden</button>
+              <button type="submit">Konfiguration speichern</button>
+            </div>
+          </form>
+          <p class="admin-meta" id="settings-meta"></p>
+        </section>
+
+        <section class="admin-section rag-section" aria-labelledby="rag-heading">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Gemeinsames Wissen</p>
+              <h3 id="rag-heading">Zentrales RAG</h3>
+              <p class="section-copy">Lade eigene Quellen hoch und veröffentliche sie für deinen Avatar.</p>
+            </div>
+            <button type="button" id="rag-rebuild-button">Änderungen veröffentlichen</button>
+          </div>
+
+          <div class="rag-stats" id="rag-stats" aria-live="polite"></div>
+
+          <form id="rag-upload-form" class="upload-form">
+            <div>
+              <label for="rag-file-input">Wissensdateien hinzufügen</label>
+              <p class="field-help">Markdown oder Text, maximal 2 MB pro Datei. Mehrere Dateien sind möglich.</p>
+            </div>
+            <input id="rag-file-input" type="file" accept=".md,.txt,text/markdown,text/plain" multiple />
+            <button type="submit">Dateien übernehmen</button>
+          </form>
+
+          <form id="rag-source-form" class="source-editor" hidden>
+            <div class="section-heading compact-heading">
+              <div>
+                <p class="eyebrow">Quelle bearbeiten</p>
+                <h4 id="source-editor-heading">Wissensdatei</h4>
+              </div>
+              <button class="ghost-button" type="button" id="source-cancel-button">Schliessen</button>
+            </div>
+            <label for="rag-source-path">Pfad im Wissensraum</label>
+            <input id="rag-source-path" type="text" maxlength="240" placeholder="03-rag-quellen/neue-quelle.md" />
+            <label for="rag-source-content">Inhalt</label>
+            <textarea id="rag-source-content" spellcheck="true"></textarea>
+            <div class="settings-actions">
+              <button type="submit">Quelle speichern</button>
+            </div>
+          </form>
+
+          <div class="source-list-heading">
+            <h4>Aktive Wissensquellen</h4>
+            <span id="rag-source-count"></span>
+          </div>
+          <div class="source-list" id="rag-source-list"></div>
+
+          <details class="version-panel">
+            <summary>Frühere RAG-Versionen</summary>
+            <p class="field-help">Ein Rollback stellt sowohl die Wissensdateien als auch den dazugehörigen Index wieder her.</p>
+            <div class="version-list" id="rag-version-list"></div>
+          </details>
+        </section>
+      </section>
+
+      <p class="admin-status" id="admin-status" role="status"></p>
+    </main>
+
+    <script src="admin.js"></script>
+  </body>
+</html>
+
