@@ -57,6 +57,12 @@ On the knowledge server, set `AVATAR_RAG_SERVICE_TOKENS` to one or more comma-se
 
 The `demo/` directory is a buildless, browser-only demo. It includes three avatar presets, custom portraits, colours, sample knowledge and browser text-to-speech. Responses are clearly marked as simulated; it does not connect to OpenAI or request microphone access. Serve the directory with any static web server. Avatar settings are saved only in browser local storage.
 
+### ChatGPT Sites edition
+
+The `sites/` directory contains the hosted edition. Its `/admin` page accepts a per-user OpenRouter key for text chat and an OpenAI API key for microphone conversations. Voice uses WebRTC, server-side turn detection and interruption with `gpt-realtime-2`. The avatar profile and knowledge are included in each voice session. Microphone audio goes directly to OpenAI. The browser voice sample is also available without a provider key.
+
+To deploy your own copy, register a private ChatGPT Site, set its project ID in `sites/.openai/hosting.json`, and configure the R2 binding `BUCKET`. Set `AVATAR_KEY_ENCRYPTION` as a runtime secret containing a base64-encoded, randomly generated 32-byte AES key. Keep that value stable across deployments to retain access to saved credentials. Run `node build.mjs` from `sites/` and publish the Worker output through Sites. The Worker trusts the identity header supplied by the Sites gateway. Deployments outside Sites must authenticate users and supply a trusted identity server-side.
+
 ## Development
 
 ```sh

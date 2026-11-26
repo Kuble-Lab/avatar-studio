@@ -1,0 +1,11 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin · Avatar Studio</title><link rel="stylesheet" href="/styles.css"></head><body>
+<header class="topbar"><a class="brand" href="/">Avatar Studio</a><a href="/">Zum Avatar</a></header>
+<main class="config-form" style="max-width:40rem;margin:3rem auto"><h1>API-Keys</h1>
+<section data-endpoint="/api/openai-key"><h2>OpenAI · Realtime Voice</h2><p>Das Sprachgespräch sendet Mikrofon-Audio und das Avatar-Profil an OpenAI. Die Abrechnung erfolgt über dein OpenAI-API-Konto.</p><p data-state role="status"></p><form class="config-form"><label>OpenAI API-Key<input type="password" autocomplete="off" spellcheck="false" required maxlength="503" placeholder="sk-…"></label><button class="configure-button">OpenAI-Key speichern</button></form><button data-remove class="subtle" hidden>OpenAI-Key entfernen</button><p data-result role="status"></p></section>
+<section data-endpoint="/api/key"><h2>OpenRouter · Textchat</h2>
+<p>Mit deinem Key verwendet der Textchat OpenRouter. Chatverlauf, Persönlichkeit und Avatar-Wissen werden bei jeder Anfrage an OpenRouter gesendet. Die Nutzung wird über dein OpenRouter-Konto abgerechnet.</p>
+<p data-state role="status">Verbindung wird geprüft …</p>
+<form id="key-form" class="config-form"><label>OpenRouter API-Key<input type="password" id="key" autocomplete="off" spellcheck="false" required maxlength="250" placeholder="sk-or-…"></label>
+<button class="configure-button" type="submit">Key prüfen und speichern</button></form>
+<button data-remove class="subtle" hidden>Gespeicherten Key entfernen</button><p data-result role="status"></p></section></main>
+<script src="/admin.js" defer></script></body></html>
