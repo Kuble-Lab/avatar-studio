@@ -1,5 +1,6 @@
 (() => {
   const button = $('live-voice');
+  const check = $('voice-check');
   const info = $('voice-info');
   let active;
   let configured = false;
@@ -15,6 +16,7 @@
       info.textContent = 'OpenAI-Key-Status konnte nicht geladen werden.';
     }
     button.disabled = !configured;
+    check.disabled = !configured;
   }
 
   function stop(note) {
@@ -28,12 +30,13 @@
     call.audio.pause();
     call.audio.srcObject = null;
     button.textContent = 'Sprachgespräch starten';
+    check.disabled = !configured;
     $('voice-button').disabled = false;
     info.textContent = note;
     status(note);
   }
 
-  async function start() {
+  async function start(testOnly=false) {
     if (active) return stop('Sprachgespräch beendet.');
     if (!configured) return;
     stopSpeech();
@@ -41,18 +44,20 @@
     active = call;
     button.textContent = 'Gespräch beenden';
     $('voice-button').disabled = true;
-    info.textContent = 'Bitte Mikrofonzugriff erlauben.';
+    check.disabled = true;
+    info.textContent = testOnly?'Prüfe die Sprachverbindung ohne Mikrofon …':'Bitte Mikrofonzugriff erlauben.';
     try {
-      if (!navigator.mediaDevices?.getUserMedia || !window.RTCPeerConnection) throw Error('Dieser Browser unterstützt den Mikrofonzugriff über WebRTC nicht.');
-      const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true}});
-      if (active !== call) {stream.getTracks().forEach(track=>track.stop());return;}
+      if ((!testOnly && !navigator.mediaDevices?.getUserMedia) || !window.RTCPeerConnection) throw Error('Dieser Browser unterstützt den Mikrofonzugriff über WebRTC nicht.');
+      const stream = testOnly ? null : await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true}});
+      if (active !== call) {stream?.getTracks().forEach(track=>track.stop());return;}
       call.stream = stream;
       info.textContent = 'Verbindung mit OpenAI wird aufgebaut …';
       call.timeout = setTimeout(()=>{if(active===call)stop('Verbindungsaufbau dauerte zu lange. Bitte erneut versuchen.');},35000);
       const peer = call.peer = new RTCPeerConnection();
-      stream.getAudioTracks().forEach(track => peer.addTrack(track,stream));
+      if (testOnly) peer.addTransceiver('audio',{direction:'recvonly'});
+      else stream.getAudioTracks().forEach(track => peer.addTrack(track,stream));
       peer.ontrack = event => {
-        if (active !== call) return;
+        if (active !== call || testOnly) return;
         call.audio.srcObject = event.streams[0] || new MediaStream([event.track]);
         call.audio.play().catch(()=>{if(active===call)stop('Audiowiedergabe blockiert. Bitte erneut starten.');});
       };
@@ -62,6 +67,7 @@
       const channel = peer.createDataChannel('avatar-events');
       channel.onopen = () => {
         if (active!==call) return;
+        if (testOnly) return stop('Verbindung zu OpenAI Realtime erfolgreich.');
         clearTimeout(call.timeout);
         info.textContent = 'Verbunden. Du kannst sprechen und den Avatar unterbrechen.';
         status('Ich höre zu …','listening');
@@ -88,7 +94,8 @@
       if(active===call)stop(error.name==='NotAllowedError'?'Mikrofonzugriff blockiert. Bitte in den Browser-Einstellungen erlauben.':error.message || 'Sprachverbindung fehlgeschlagen.');
     }
   }
-  button.addEventListener('click',start);
+  button.addEventListener('click',()=>start());
+  check.addEventListener('click',()=>start(true));
   $('configure-button').addEventListener('click',()=>stop('Sprachgespräch beendet.'));
   $('clear-button').addEventListener('click',()=>stop('Sprachgespräch beendet.'));
   window.addEventListener('pagehide',()=>stop('Sprachgespräch beendet.'));

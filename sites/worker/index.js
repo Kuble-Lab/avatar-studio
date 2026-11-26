@@ -32,7 +32,7 @@ async function handle(request,env) {
       if (typeof key !== 'string' || !/^sk-(?!or-)[A-Za-z0-9_-]{12,500}$/.test(key)) return json({error:'Bitte einen OpenAI-API-Key eingeben.'},400);
     } else {
       if (typeof key !== 'string' || !/^sk-or-[a-zA-Z0-9_-]{8,240}$/.test(key)) return json({error:'Bitte einen gültigen OpenRouter-Key eingeben.'},400);
-      const check = await fetch(base+'/key',{headers:{Authorization:'Bearer '+key},redirect:'error'});
+      const check = await fetch(base+'/key',{headers:{Authorization:'Bearer '+key},redirect:'manual'});
       if (!check.ok) return json({error:check.status===401 ? 'OpenRouter hat den Key abgelehnt.' : 'OpenRouter konnte den Key gerade nicht prüfen.'},422);
     }
     const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -41,10 +41,15 @@ async function handle(request,env) {
     return json({configured:true});
   }
   if (!['/api/chat','/api/realtime/call'].includes(url.pathname) || request.method !== 'POST') return json({},404);
-  const saved = await env.BUCKET.get(record);
+  let saved;
+  try { saved = await env.BUCKET.get(record); }
+  catch { return json({error:'Der Schlüsselspeicher ist momentan nicht erreichbar.'},503); }
   if (!saved) return json({error:voice?'Bitte den OpenAI-Key im Admin-Bereich hinterlegen.':'Bitte zuerst deinen OpenRouter-Key hinterlegen.'},409);
-  const {iv,cipher} = await saved.json();
-  const plain = await crypto.subtle.decrypt({name:'AES-GCM',iv:new Uint8Array(iv),additionalData:new TextEncoder().encode(record)},await encryptionKey(env),new Uint8Array(cipher));
+  let plain;
+  try {
+    const {iv,cipher} = JSON.parse(await saved.text());
+    plain = await crypto.subtle.decrypt({name:'AES-GCM',iv:new Uint8Array(iv),additionalData:new TextEncoder().encode(record)},await encryptionKey(env),new Uint8Array(cipher));
+  } catch { return json({error:'Der gespeicherte Key konnte nicht entschlüsselt werden. Bitte im Admin erneut speichern.'},503); }
   if (voice) {
     const {sdp,profile} = await request.json();
     if (typeof sdp !== 'string' || !sdp.startsWith('v=0') || sdp.length>65536 || typeof profile!=='string' || profile.length>10000) return json({error:'Ungültige Sprachverbindung.'},400);
@@ -56,7 +61,19 @@ async function handle(request,env) {
     const form=new FormData();
     form.set('sdp',sdp);
     form.set('session',JSON.stringify(session));
-    const upstream=await fetch('https://api.openai.com/v1/realtime/calls',{method:'POST',headers:{Authorization:'Bearer '+new TextDecoder().decode(plain)},body:form,redirect:'error',signal:AbortSignal.timeout(25000)});
+    const controller = new AbortController();
+    const timer = setTimeout(()=>controller.abort(),25000);
+    let upstream;
+    try {
+      // Serialize once so the hosting transport receives bytes and the matching multipart boundary.
+      const encoded = new Response(form);
+      upstream = await fetch('https://api.openai.com/v1/realtime/calls',{
+        method:'POST', headers:{Authorization:'Bearer '+new TextDecoder().decode(plain),'Content-Type':encoded.headers.get('Content-Type')},
+        body:await encoded.arrayBuffer(),redirect:'manual',signal:controller.signal
+      });
+    } catch {
+      return json({error:controller.signal.aborted?'OpenAI hat nicht rechtzeitig geantwortet.':'Der Hosting-Server konnte OpenAI Realtime nicht erreichen.'},502);
+    } finally { clearTimeout(timer); }
     if (!upstream.ok) return json({error:({401:'OpenAI hat den Key abgelehnt. Bitte im Admin ersetzen.',403:'Dem Key fehlt der Zugriff auf OpenAI Realtime.',429:'OpenAI-Kontingent oder Anfragelimit erreicht.'})[upstream.status] || 'OpenAI konnte das Gespräch nicht starten. Bitte Modellzugriff und Abrechnung prüfen.'},502);
     const answer=await upstream.text();
     if (!answer.startsWith('v=0')) return json({error:'OpenAI lieferte keine gültige Sprachverbindung.'},502);
@@ -64,7 +81,7 @@ async function handle(request,env) {
   }
   const {question,profile,history} = await request.json();
   if (typeof question !== 'string' || !question.trim() || question.length>8000 || typeof profile!=='string' || profile.length>10000 || !Array.isArray(history) || history.length>10 || history.some(m=>!['user','assistant'].includes(m?.role)||typeof m.content!=='string'||m.content.length>8000)) return json({error:'Ungültige Chat-Nachricht.'},400);
-  const response = await fetch(base+'/chat/completions',{method:'POST',redirect:'error',headers:{Authorization:'Bearer '+new TextDecoder().decode(plain),'Content-Type':'application/json'},body:JSON.stringify({model:'openai/gpt-4o-mini',max_tokens:800,messages:[{role:'system',content:profile},...history,{role:'user',content:question}]})});
+  const response = await fetch(base+'/chat/completions',{method:'POST',redirect:'manual',headers:{Authorization:'Bearer '+new TextDecoder().decode(plain),'Content-Type':'application/json'},body:JSON.stringify({model:'openai/gpt-4o-mini',max_tokens:800,messages:[{role:'system',content:profile},...history,{role:'user',content:question}]})});
   if (!response.ok) return json({error:({401:'Bitte den API-Key im Admin-Bereich erneuern.',402:'Das OpenRouter-Guthaben reicht nicht aus.',429:'OpenRouter ist ausgelastet. Bitte erneut versuchen.'})[response.status] || 'OpenRouter konnte die Anfrage nicht beantworten.'},502);
   const answer = (await response.json()).choices?.[0]?.message?.content;
   return typeof answer==='string' && answer.trim() ? json({answer}) : json({error:'OpenRouter lieferte eine leere Antwort.'},502);

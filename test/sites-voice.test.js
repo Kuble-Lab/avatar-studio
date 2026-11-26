@@ -8,7 +8,7 @@ test('authenticated voice calls use only the caller’s encrypted OpenAI key', a
     AVATAR_KEY_ENCRYPTION:Buffer.from(crypto.getRandomValues(new Uint8Array(32))).toString('base64'),
     BUCKET:{
       head:name=>records.has(name), put:(name,value)=>records.set(name,value),
-      get:name=>records.has(name)?{json:()=>JSON.parse(records.get(name))}:null,
+      get:name=>records.has(name)?{text:()=>records.get(name)}:null,
       delete:name=>records.delete(name)
     }
   };
@@ -22,7 +22,10 @@ test('authenticated voice calls use only the caller’s encrypted OpenAI key', a
   t.mock.method(globalThis,'fetch',async (url,options)=>{
     assert.equal(url,'https://api.openai.com/v1/realtime/calls');
     assert.equal(options.headers.Authorization,'Bearer '+key);
-    const session=JSON.parse(options.body.get('session'));
+    assert.equal(options.redirect,'manual');
+    const multipart=await new Response(options.body,{headers:options.headers}).formData();
+    assert.equal(multipart.get('sdp'),'v=0\r\n');
+    const session=JSON.parse(multipart.get('session'));
     assert.equal(session.model,'gpt-realtime-2');
     assert.equal(session.audio.input.turn_detection.interrupt_response,true);
     assert.match(session.instructions,/Lerncoach/);
