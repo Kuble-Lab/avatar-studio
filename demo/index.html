@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="de">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Avatar Studio · Interaktive Demo</title><link rel="stylesheet" href="styles.css"></head>
+<body>
+<header class="topbar"><a class="brand" href="./">◈ <span>Avatar Studio</span></a><div class="top-actions"><span class="demo-badge">INTERAKTIVE DEMO</span><a href="https://github.com/Kuble-Lab/avatar-studio" target="_blank" rel="noopener">GitHub</a><button class="configure-button" id="configure-button">Avatar gestalten</button></div></header>
+<main class="workspace">
+<section class="avatar-panel" aria-labelledby="avatar-name">
+ <div class="eyebrow">DEIN DIGITALER GESPRÄCHSPARTNER</div>
+ <div class="avatar-stage" id="avatar-stage" data-state="ready"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="avatar-core" id="avatar-initial" aria-hidden="true">A</div><img id="avatar-image" alt="" hidden></div>
+ <div class="identity"><h1 id="avatar-name">Alex</h1><p id="avatar-description">Dein persönlicher KI-Avatar</p></div>
+ <p class="status" id="status" role="status">Demo bereit</p>
+ <button class="voice-button" id="voice-button">Stimme anhören</button>
+ <p class="voice-hint">Teste das Design, die Persönlichkeit und eigenes Beispielwissen.</p>
+ <p class="disclosure">Stimmprobe über die Browser-Sprachausgabe. Keine Mikrofonaufnahme.</p>
+</section>
+<section class="conversation" aria-labelledby="conversation-heading">
+ <div class="conversation-header"><div><span class="eyebrow">IM DIALOG</span><h2 id="conversation-heading">Dein Gespräch</h2></div><button class="subtle" id="clear-button" title="Gesprächsverlauf löschen">Neu beginnen</button></div>
+ <div class="demo-notice">Diese Demo zeigt Beispielantworten. Echte KI und Realtime Voice sind in der Open-Source-App verfügbar.</div><div class="messages" id="messages" role="log" aria-live="polite" aria-label="Gesprächsverlauf"></div>
+ <div class="suggestions"><button data-question="Was kannst du?">Was kannst du?</button><button data-question="Wie starte ich?">Wie starte ich?</button></div><form id="chat-form"><label class="sr-only" for="question">Deine Nachricht</label><textarea id="question" rows="2" maxlength="8000" placeholder="Was möchtest du besprechen?"></textarea><div class="composer-footer"><span>Enter zum Senden · Shift + Enter für neue Zeile</span><button id="send-button" type="submit">Senden</button></div></form>
+ <p class="privacy-note">Demo-Chat bleibt in diesem Tab. Deine Avatar-Einstellungen werden nur in diesem Browser gespeichert.</p>
+</section>
+</main>
+<dialog id="config-dialog" aria-labelledby="config-heading">
+ <form id="demo-config" class="config-form">
+  <div class="drawer-heading"><div><p class="eyebrow">DEIN AVATAR, DEINE IDEE</p><h2 id="config-heading">Gestalte dein Gegenüber</h2></div><button type="button" class="subtle" id="close-config" aria-label="Konfiguration schliessen">Schliessen</button></div>
+  <p class="config-intro">Probiere eine Rolle aus oder gib deinem Avatar einen eigenen Charakter.</p>
+  <div class="presets"><button type="button" data-preset="alex">Alex · Begleiter</button><button type="button" data-preset="mira">Mira · Lerncoach</button><button type="button" data-preset="noah">Noah · Support</button></div>
+  <div class="config-grid"><label>Name<input id="edit-name" maxlength="80" required></label><label>Akzentfarbe<input id="edit-accent" type="color"></label></div>
+  <label>Kurzbeschreibung<input id="edit-description" maxlength="240"></label>
+  <label>Begrüssung<textarea id="edit-greeting" rows="2" maxlength="500"></textarea></label>
+  <label>Persönlichkeit<textarea id="edit-personality" rows="3" maxlength="2000"></textarea><small>In der Vollversion steuert dies die KI. Die Demo verwendet Beispielantworten.</small></label>
+  <label>Eigenes Avatar-Bild<input id="edit-image" type="file" accept="image/png,image/jpeg,image/webp"><small>Optional · PNG, JPEG oder WebP · maximal 1 MB</small></label>
+  <button type="button" class="subtle" id="remove-image">Neutrales Symbol verwenden</button>
+  <label>Stimmprobe<select id="edit-voice"><option value="">Standardstimme des Browsers</option></select><small>Browser-Stimmen zur Vorschau. Die Vollversion verwendet OpenAI Realtime.</small></label>
+  <label>Beispielwissen<textarea id="edit-knowledge" rows="4" maxlength="5000" placeholder="Zum Beispiel: Unser Team ist Montag bis Freitag von 9 bis 17 Uhr erreichbar."></textarea><small>Die Demo sucht nach passenden Wörtern in diesem Text.</small></label>
+  <div class="config-grid"><label>Antwortmodus<select id="edit-mode"><option value="general">Allgemeine Beispielantworten</option><option value="knowledge">Nur Beispielwissen</option></select></label></div>
+  <p id="config-status" role="status"></p>
+  <div class="config-footer"><button type="button" class="subtle" id="reset-demo">Zurücksetzen</button><button class="configure-button" type="submit">Änderungen übernehmen</button></div>
+ </form>
+</dialog>
+<script src="app.js" defer></script>
+</body></html>

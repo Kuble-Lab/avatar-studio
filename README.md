@@ -53,6 +53,10 @@ Chat history remains in the browser tab and is sent as conversation context. Tex
 
 On the knowledge server, set `AVATAR_RAG_SERVICE_TOKENS` to one or more comma-separated tokens. On a web client instance, set `AVATAR_RAG_URL` and `AVATAR_RAG_TOKEN`. Use HTTPS. Knowledge and the effective system prompt come from the central instance; appearance and voice are configured per instance. A remote outage returns an error without silently using a stale local index.
 
+## Interactive demo
+
+The `demo/` directory is a buildless, browser-only demo. It includes three avatar presets, custom portraits, colours, sample knowledge and browser text-to-speech. Responses are clearly marked as simulated; it does not connect to OpenAI or request microphone access. Serve the directory with any static web server. Avatar settings are saved only in browser local storage.
+
 ## Development
 
 ```sh
